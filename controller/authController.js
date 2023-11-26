@@ -72,7 +72,7 @@ const signin = async (req, res) => {
     const user = await userModel.findOne({ email }).select("+password");
 
     // Cheking user exits and password is correct
-    if (!user || !user.password === password) {
+    if (!user || user.password !== password) {
       return res.status(400).json({
         success: false,
         message: "Invalid credentials",
