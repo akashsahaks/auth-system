@@ -4,7 +4,7 @@ const signup = (req, res) => {
 
   return res.status(200).json({
     success: true,
-    data: req.body,
+    data: req.body, // responding data received from user(body)
   });
 };
 
