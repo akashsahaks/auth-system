@@ -1,5 +1,5 @@
 const emailValidator = require("email-validator");
-const userModels = require("../model/userSchema");
+const userModel = require("../model/userSchema");
 
 const signup = async (req, res) => {
   //   console.log("Request Body : ", req.body);
@@ -33,7 +33,7 @@ const signup = async (req, res) => {
 
   try {
     // creating a new user
-    const user = userModels(req.body);
+    const user = userModel(req.body);
     // saving the user in the database
     const result = await user.save();
 
@@ -55,4 +55,50 @@ const signup = async (req, res) => {
   }
 };
 
-module.exports = { signup };
+const signin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Cheking email and password exists
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    // Getting user from the database
+    const user = await userModel.findOne({ email }).select("+password");
+
+    // Cheking user exits and password is correct
+    if (!user || !user.password === password) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    //Creating token
+    const token = user.jwtToken();
+    user.password = undefined;
+
+    const cookieOption = {
+      maxAge: 10000 * 60 * 60 * 24, // 24 hr in milliseconds
+      httpOnly: true,
+    };
+
+    // setting cookie
+    res.cookie("token", token, cookieOption);
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { signup, signin };
