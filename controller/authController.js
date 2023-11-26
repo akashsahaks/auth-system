@@ -1,5 +1,6 @@
 const emailValidator = require("email-validator");
 const userModel = require("../model/userSchema");
+const bcrypt = require("bcrypt");
 
 const signup = async (req, res) => {
   //   console.log("Request Body : ", req.body);
@@ -72,7 +73,7 @@ const signin = async (req, res) => {
     const user = await userModel.findOne({ email }).select("+password");
 
     // Cheking user exits and password is correct
-    if (!user || user.password !== password) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(400).json({
         success: false,
         message: "Invalid credentials",

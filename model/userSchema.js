@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-var JWT = require("jsonwebtoken");
+const JWT = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const userSchema = new Schema(
   {
@@ -37,6 +38,15 @@ userSchema.methods = {
     );
   },
 };
+
+// hashing password before saving into db
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+  this.password = await bcrypt.hash(this.password, 10);
+  return next();
+});
 
 const userModels = mongoose.model("User", userSchema);
 module.exports = userModels;
