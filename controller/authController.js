@@ -48,6 +48,7 @@ const signup = async (req, res) => {
         message: "Accound already registered with provided email id",
       });
     }
+
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -101,4 +102,20 @@ const signin = async (req, res) => {
   }
 };
 
-module.exports = { signup, signin };
+const getUser = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const user = await userModel.findById(userId);
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { signup, signin, getUser };
